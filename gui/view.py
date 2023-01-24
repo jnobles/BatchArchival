@@ -5,6 +5,7 @@ class BatchArchivalAssistant(tk.Tk):
         super().__init__()
         self.buttons = {}
         self.entries = {}
+        self.status = None
 
     def create_label(self, parent, text, row, col, rowspan=1, colspan=1, anchor=tk.CENTER):
         label = tk.Label(parent, text=text, anchor=anchor)
@@ -29,28 +30,23 @@ class BatchArchivalAssistant(tk.Tk):
 
     def create_main_window(self):
         entry_frame = tk.Frame(self)
-        self.create_label(entry_frame, 'Catalog Number', 0, 0, anchor=tk.E)
-        self.create_entry(entry_frame, 'catalog', 0, 1)
+        self.create_label(self, 'Catalog Number', 0, 0, anchor=tk.E)
+        self.create_entry(self, 'catalog', 0, 1)
 
-        self.create_label(entry_frame, 'Lot Number', 1, 0, anchor=tk.E)
-        self.create_entry(entry_frame, 'lot_entry', 1, 1)
+        self.create_label(self, 'Lot Number', 1, 0, anchor=tk.E)
+        self.create_entry(self, 'lot_entry', 1, 1)
 
-        self.create_label(entry_frame, 'Release Year', 2, 0, anchor=tk.E)
-        self.create_entry(entry_frame, 'year_entry', 2, 1)
+        self.create_label(self, 'Release Year', 2, 0, anchor=tk.E)
+        self.create_entry(self, 'year_entry', 2, 1)
 
-        grid_cols, grid_rows = entry_frame.grid_size()
-        entry_frame.columnconfigure(tuple(range(grid_cols)), weight=1)
-        entry_frame.rowconfigure(tuple(range(grid_rows)), weight=1)
-        entry_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.create_button(self, 'enter', 'Enter', 0, 2)
+        self.create_button(self, 'skip', 'Skip', 1, 2)
+        self.create_button(self, 'exit', 'Exit', 2, 2)
 
-        button_frame = tk.Frame(self)
-        self.create_button(button_frame, 'enter', 'Enter', 0, 0)
-        self.create_button(button_frame, 'skip', 'Skip', 1, 0)
-        self.create_button(button_frame, 'exit', 'Exit', 2, 0)
-        grid_cols, grid_rows = button_frame.grid_size()
-        button_frame.columnconfigure(tuple(range(grid_cols)), weight=1)
-        button_frame.rowconfigure(tuple(range(grid_rows)), weight=1)
-        button_frame.pack(side=tk.RIGHT, fill=tk.X)
+        self.status = tk.StringVar()
+        self.status.set('test')
+        status_label = tk.Label(self, textvariable=self.status, anchor=tk.W, relief=tk.RIDGE)
+        status_label.grid(row=self.grid_size()[0], column=0, columnspan=self.grid_size()[1], sticky=tk.NSEW)
         
     def run(self):
         self.create_main_window()
