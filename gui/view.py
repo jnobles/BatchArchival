@@ -1,20 +1,23 @@
 import tkinter as tk
 
-class BatchArchivalAssistant(tk.Tk):
+class MainView(tk.Tk):
+    font = {'font': ('Arial', 14)}
+
     def __init__(self):
         super().__init__()
         self.buttons = {}
         self.entries = {}
         self.status = None
+        self.create_main_window()
 
     def create_label(self, parent, text, row, col, rowspan=1, colspan=1, anchor=tk.CENTER):
-        label = tk.Label(parent, text=text, anchor=anchor)
+        label = tk.Label(parent, text=text, anchor=anchor, **MainView.font)
         settings = {'row':row, 'column':col, 'rowspan':rowspan, 'columnspan':colspan,
                     'sticky':tk.NSEW}
         label.grid(**settings)
 
     def create_button(self, parent, name, text, row, col, rowspan=1, colspan=1):
-        button = tk.Button(parent, text=text)
+        button = tk.Button(parent, text=text, **MainView.font)
         self.buttons[name] = button
         settings = {'row':row, 'column':col, 'rowspan':rowspan, 'columnspan':colspan,
                     'sticky':tk.NSEW, 'padx':2, 'pady':2}
@@ -22,10 +25,10 @@ class BatchArchivalAssistant(tk.Tk):
 
     def create_entry(self, parent, name, row, col, rowspan=1, colspan=1):
         stringVar = tk.StringVar()
-        entry = tk.Entry(parent, textvariable=stringVar)
+        entry = tk.Entry(parent, textvariable=stringVar, **MainView.font)
         self.entries[name] = stringVar
         settings = {'row':row, 'column':col, 'rowspan':rowspan, 'columnspan':colspan,
-                    'sticky':tk.NSEW}
+                    'sticky':tk.NSEW, 'padx':2, 'pady':2}
         entry.grid(**settings)
 
     def create_main_window(self):
@@ -42,17 +45,36 @@ class BatchArchivalAssistant(tk.Tk):
         self.create_button(self, 'enter', 'Enter', 0, 2)
         self.create_button(self, 'skip', 'Skip', 1, 2)
         self.create_button(self, 'exit', 'Exit', 2, 2)
-
+        self.buttons['exit'].configure(command=self.winfo_toplevel().destroy)
         self.status = tk.StringVar()
-        self.status.set('test')
         status_label = tk.Label(self, textvariable=self.status, anchor=tk.W, relief=tk.RIDGE)
         status_label.grid(row=self.grid_size()[0], column=0, columnspan=self.grid_size()[1], sticky=tk.NSEW)
-        
-    def run(self):
-        self.create_main_window()
-        self.buttons['exit'].configure(command=self.destroy)
-        self.eval('tk::PlaceWindow . center')
-        self.mainloop()
 
-app = BatchArchivalAssistant()
-app.run()
+        self.resizable(False, False)
+        self.title('ISOTEC Batch Archival Assistant')
+        self.eval('tk::PlaceWindow . center')
+
+from PIL import ImageTk, Image
+class PreviewPane(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+        self.image = None
+        self.title('Preview')
+        self.protocol('WM_DELETE_WINDOW', lambda: True)
+        self.withdraw()
+
+    def hide(self):
+        self.withdraw()
+
+    def show(self):
+        self.deiconify()
+
+    def set_image(self, path):
+        self.image = ImageTk.PhotoImage(Image.open(path))
+        self.image.pack()
+
+
+app = MainView()
+preview = PreviewPane(app)
+app.mainloop()
