@@ -9,6 +9,7 @@ class MainView(tk.Tk):
         self.entries = {}
         self.status = None
         self.create_main_window()
+        self.preview = PreviewPane(self)
 
     def create_label(self, parent, text, row, col, rowspan=1, colspan=1, anchor=tk.CENTER):
         label = tk.Label(parent, text=text, anchor=anchor, **MainView.font)
@@ -76,5 +77,4 @@ class PreviewPane(tk.Toplevel):
 
 
 app = MainView()
-preview = PreviewPane(app)
 app.mainloop()
