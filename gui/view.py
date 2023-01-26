@@ -73,8 +73,5 @@ class PreviewPane(tk.Toplevel):
 
     def set_image(self, path):
         self.image = ImageTk.PhotoImage(Image.open(path))
-        self.image.pack()
-
-
-app = MainView()
-app.mainloop()
+        display = tk.Label(self, image=self.image)
+        display.pack()
