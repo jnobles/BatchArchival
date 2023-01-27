@@ -26,8 +26,8 @@ class MainView(tk.Tk):
 
     def create_entry(self, parent, name, row, col, rowspan=1, colspan=1):
         stringVar = tk.StringVar()
-        entry = tk.Entry(parent, textvariable=stringVar, **MainView.font)
-        self.entries[name] = stringVar
+        entry = tk.Entry(parent, textvariable=stringVar, highlightthickness=2, **MainView.font)
+        self.entries[name] = (entry, stringVar)
         settings = {'row':row, 'column':col, 'rowspan':rowspan, 'columnspan':colspan,
                     'sticky':tk.NSEW, 'padx':2, 'pady':2}
         entry.grid(**settings)

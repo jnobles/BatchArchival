@@ -15,7 +15,10 @@ class Controller():
             self.view.preview.set_image(image)
 
     def enter_handler(self):
-        self.clear_all_entries()
+        if not self.model.valdidate_catalog_entry(self.view.entries['catalog'][1].get()):
+            self.view.entries['catalog'][0].configure(highlightbackground='red', highlightcolor='red')
+
+        #self.clear_all_entries()
         self.update_button_states()
 
     def skip_handler(self):
@@ -24,7 +27,7 @@ class Controller():
         self.active_file.pop(0)
 
     def clear_all_entries(self):
-        for field in self.view.entries.values():
+        for field in [item[1] for item in self.view.entries.values()]:
             field.set('')
 
     def update_button_states(self):
