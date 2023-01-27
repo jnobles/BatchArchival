@@ -1,12 +1,13 @@
 from view import MainView
 from model import Model
-import tempfile
 import fitz
 
 class Controller():
     def __init__(self, model, view):
         self.model = model
         self.view = view
+        self.update_button_states()
+        self.update_status_files_remaining()
 
     def update_preview_image(pixelmap):
         with tempfile.TemporaryFile() as temp:
@@ -14,18 +15,34 @@ class Controller():
             self.view.preview.set_image(image)
 
     def enter_handler(self):
-        current_file = self.model.file_list[0]
-        pixmap = self.model.get_first_page_pixmap(current_file)
-        with tempfile.TemporaryFile() as temp:
-            pixmap.save(temp, output='png')
-            self.view.preview.set_image(temp.name)
-
-        self.view.preview.show()
-        self.view.status.set('Shown!')
+        self.clear_all_entries()
+        self.update_button_states()
 
     def skip_handler(self):
-        self.view.preview.hide()
-        self.view.status.set('Hidden!')
+        self.clear_all_entries()
+        self.model.file_list.append(self.model.active_file)
+        self.active_file.pop(0)
+
+    def clear_all_entries(self):
+        for field in self.view.entries.values():
+            field.set('')
+
+    def update_button_states(self):
+        if len(self.model.file_list) == 0:
+            if self.model.active_file is None:
+                self.view.buttons['enter'].configure(state='disabled')
+                self.view.buttons['skip'].configure(state='disabled')
+            else:
+                self.view.buttons['skip'].configure(state='disabled')
+
+    def update_status_files_remaining(self):
+        if len(self.model.file_list) >= 1:
+            self.view.status.set(f'{len(self.model.file_list)+1} files remaining.')
+        else:
+            if self.model.active_file is not None:
+                self.view.status.set('1 file remaining.')
+            else:
+                self.view.status.set('0 files remaining.')
 
     def run(self):
         self.view.buttons['enter'].configure(command=self.enter_handler)

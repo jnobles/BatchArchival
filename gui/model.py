@@ -2,6 +2,7 @@ import os, sys
 import re
 import fitz
 import datetime
+import tempfile
 
 class NoFilesFound(Exception):
     pass
@@ -32,17 +33,25 @@ class Model():
             if not os.path.exists(os.path.join(self.directory, folder)):
                 os.mkdir(os.path.join(self.directory, folder))
 
+        self.cache_dir = TemporaryDirectory()
+        self.cache_previews()
+
     def get_input_files(self):
         file_list = os.listdir(self.directory)
         r = re.compile(Model.file_type_pattern)
         return list(filter(r.match, file_list))
 
-    def get_first_page_pixmap(self, file):
-        file = os.path.join(self.directory, file)
-        doc = fitz.open(file)
-        page = doc.load_page(0)
-        pix = page.get_pixmap()
-        return pix
+    def cache_previews(self):
+        for file in [self.active_files] + self.file_list:
+            fullpath = os.path.join(self.directory, file)
+            doc = fitz.open(fullpath)
+            page = doc.load_page(0)
+            pix = page.get_pixmap()
+            pix.save(os.path.join(self.cache_dir, file))
+
+    def cleanup_cache(self):
+        self.cache_dir.cleanup()
+
 
     def get_next_file(self, return_active=False):
         if return_active == True:
@@ -54,7 +63,9 @@ class Model():
             raise NoFilesFound(f'No .pdf files found in {self.directory}')
 
     def move_active_file(self, catalog:str, lot:str, year:int):
-        if not os.exists
+        if not os.exists(os.path.join(self.directory, catalog)):
+            os.mkdir(os.path.join(self.directory, catalog))
+            # todo: finish
 
     def valdidate_entry(self, catalog, lot, year):
         if year > datetime.date.today().year - Model.retention_years:
