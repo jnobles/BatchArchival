@@ -38,10 +38,10 @@ class MainView(tk.Tk):
         self.create_entry(self, 'catalog', 0, 1)
 
         self.create_label(self, 'Lot Number', 1, 0, anchor=tk.E)
-        self.create_entry(self, 'lot_entry', 1, 1)
+        self.create_entry(self, 'lot', 1, 1)
 
         self.create_label(self, 'Release Year', 2, 0, anchor=tk.E)
-        self.create_entry(self, 'year_entry', 2, 1)
+        self.create_entry(self, 'year', 2, 1)
 
         self.create_button(self, 'enter', 'Enter', 0, 2)
         self.create_button(self, 'skip', 'Skip', 1, 2)
@@ -55,12 +55,16 @@ class MainView(tk.Tk):
         self.title('ISOTEC Batch Archival Assistant')
         self.eval('tk::PlaceWindow . center')
 
+
 from PIL import ImageTk, Image
 class PreviewPane(tk.Toplevel):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
-        self.image = None
+        self.image = None # holds photoimage to prevent garbage collection
+        self.display = tk.Label(self)
+        self.display.pack()
+
         self.title('Preview')
         self.protocol('WM_DELETE_WINDOW', lambda: True)
         self.withdraw()
@@ -73,5 +77,5 @@ class PreviewPane(tk.Toplevel):
 
     def set_image(self, path):
         self.image = ImageTk.PhotoImage(Image.open(path))
-        display = tk.Label(self, image=self.image)
-        display.pack()
+        self.display.configure(image=self.image)
+        

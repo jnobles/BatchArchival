@@ -25,6 +25,8 @@ class Model():
         self.directory = os.path.dirname(os.path.realpath(sys.argv[0]))
         self.file_list = self.get_input_files()
         if len(self.file_list) != 0:
+            self.cache_dir = tempfile.TemporaryDirectory()
+            self.cache_previews()
             self.active_file = self.file_list.pop(0)
         else:
             self.active_file = None
@@ -33,21 +35,20 @@ class Model():
             if not os.path.exists(os.path.join(self.directory, folder)):
                 os.mkdir(os.path.join(self.directory, folder))
 
-        self.cache_dir = tempfile.TemporaryDirectory()
-        self.cache_previews()
-
     def get_input_files(self):
         file_list = os.listdir(self.directory)
         r = re.compile(Model.file_type_pattern)
         return list(filter(r.match, file_list))
 
     def cache_previews(self):
-        for file in [self.active_file] + self.file_list:
+        for i, file in enumerate(self.file_list):
             fullpath = os.path.join(self.directory, file)
             doc = fitz.open(fullpath)
             page = doc.load_page(0)
             pix = page.get_pixmap()
-            pix.save(os.path.join(self.cache_dir.name, file))
+            preview_path = os.path.join(self.cache_dir.name, file.split('.')[0]+'.png')
+            self.file_list[i] = (self.file_list[i], preview_path)
+            pix.save(preview_path, output='png')
 
     def cleanup_cache(self):
         self.cache_dir.cleanup()
@@ -83,6 +84,11 @@ class Model():
         return True
 
     def valdidate_year_entry(self, year):
+        if year == '':
+            return False
+        elif type(year) == str:
+            year = int(year)
+
         if year > datetime.date.today().year - Model.retention_years:
             return False
         return True
