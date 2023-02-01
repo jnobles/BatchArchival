@@ -62,11 +62,22 @@ class PreviewPane(tk.Toplevel):
         super().__init__()
         self.parent = parent
         self.image = None # holds photoimage to prevent garbage collection
-        self.display = tk.Label(self)
-        self.display.pack()
+
+        self.display = tk.Canvas(self)
+        self.display.grid(row=0, column=0, sticky=tk.NSEW)
+        v_scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL)
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        v_scrollbar.grid(row=0, column=1, sticky=tk.NS)
+        self.display.configure(yscrollcommand=v_scrollbar.set,)
+        v_scrollbar.configure(command=self.display.yview)
 
         self.title('Preview')
         self.protocol('WM_DELETE_WINDOW', lambda: True)
+        self.geometry('500x500')
+        self.resizable(False, True)
+        self.display.bind('<Enter>', self.on_enter)
+        self.display.bind('<Leave>', self.on_leave)
         self.withdraw()
 
     def hide(self):
@@ -77,5 +88,17 @@ class PreviewPane(tk.Toplevel):
 
     def set_image(self, path):
         self.image = ImageTk.PhotoImage(Image.open(path))
-        self.display.configure(image=self.image)
-        
+        self.update()
+        self.geometry(f'{self.image.width()}x{self.winfo_height()}')
+        self.display.delete(tk.ALL)
+        self.display.create_image(0, 0, anchor=tk.NW, image=self.image)
+        self.display.configure(scrollregion=self.display.bbox(tk.ALL))
+
+    def on_mouse_scroll(self, evt):
+        self.display.yview_scroll(int(-1*(evt.delta/120)), 'units')
+
+    def on_enter(self, evt):
+        self.bind('<MouseWheel>', self.on_mouse_scroll)
+
+    def on_leave(self, evt):
+        self.unbind('<MouseWheel>')
