@@ -26,14 +26,13 @@ class MainView(tk.Tk):
 
     def create_entry(self, parent, name, row, col, rowspan=1, colspan=1):
         stringVar = tk.StringVar()
-        entry = tk.Entry(parent, textvariable=stringVar, highlightthickness=2, **MainView.font)
+        entry = tk.Entry(parent, textvariable=stringVar, highlightbackground='red', highlightcolor='red', **MainView.font)
         self.entries[name] = (entry, stringVar)
         settings = {'row':row, 'column':col, 'rowspan':rowspan, 'columnspan':colspan,
                     'sticky':tk.NSEW, 'padx':2, 'pady':2}
         entry.grid(**settings)
 
     def create_main_window(self):
-        entry_frame = tk.Frame(self)
         self.create_label(self, 'Catalog Number', 0, 0, anchor=tk.E)
         self.create_entry(self, 'catalog', 0, 1)
 
@@ -90,6 +89,7 @@ class PreviewPane(tk.Toplevel):
         self.image = ImageTk.PhotoImage(Image.open(path))
         self.update()
         self.geometry(f'{self.image.width()}x{self.winfo_height()}')
+        self.display.yview_moveto('0.0')
         self.display.delete(tk.ALL)
         self.display.create_image(0, 0, anchor=tk.NW, image=self.image)
         self.display.configure(scrollregion=self.display.bbox(tk.ALL))

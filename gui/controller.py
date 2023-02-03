@@ -14,18 +14,23 @@ class Controller():
             self.view.preview.show()
 
     def enter_handler(self):
-        if not self.model.valdidate_catalog_entry(self.view.entries['catalog'][1].get()):
-            self.view.entries['catalog'][0].configure(highlightbackground='red', highlightcolor='red')
-        if not self.model.valdidate_lot_entry(self.view.entries['lot'][1].get()):
-            self.view.entries['lot'][0].configure(highlightbackground='red', highlightcolor='red')
-        if not self.model.valdidate_year_entry(self.view.entries['year'][1].get()):
-            self.view.entries['year'][0].configure(highlightbackground='red', highlightcolor='red')
+        is_input_valid = True
+        for entry in ['catalog', 'lot', 'year']:
+            if self.model.parse_entry(self.view.entries[entry][1].get(), entry):
+                self.view.entries[entry][0].configure(highlightthickness=0)
+            else:
+                self.view.entries[entry][0].configure(highlightthickness=2)
+                is_input_valid = False
 
-        #self.clear_all_entries()
-        self.update_button_states()
+        if is_input_valid:
+            self.model.mo
+            self.clear_all_entries()
+            self.update_button_states()
 
     def skip_handler(self):
         self.clear_all_entries()
+        for entry in ['catalog', 'lot', 'year']:
+            self.view.entries[entry][0].configure(highlightthickness=0)
         self.model.get_next_file(return_active=True)
         self.view.preview.set_image(self.model.active_file[1])
         self.view.preview.update_idletasks()

@@ -4,20 +4,18 @@ import fitz
 import datetime
 import tempfile
 
-class NoFilesFound(Exception):
+class NoFilesFoundError(Exception):
     pass
 
-class DuplicateFile(Exception):
-    pass
 
-class InvalidEntry(Exception):
+class WithinRetentionPeriodError(Exception):
     pass
 
 class Model():
     # Regex matching strings
     file_type_pattern = re.compile(r'.*\.pdf')
     catalogs_pattern = re.compile(r'(?:[0-9]|X)[0-9]{5}')
-    lot_pattern = re.compile(r'(?:I|S|O|T|E|C)[A-Z]')
+    lot_pattern = re.compile(r'(?:I|S|O|T|E|C)[A-Z][0-9]{4}')
 
     retention_years = 7
 
@@ -31,7 +29,7 @@ class Model():
         else:
             self.active_file = None
 
-        for folder in ['Archived Batches', 'Potential Duplicates', 'Return to Filing']:
+        for folder in ['Archived Batches', 'RETURN TO FILING ROOM']:
             if not os.path.exists(os.path.join(self.directory, folder)):
                 os.mkdir(os.path.join(self.directory, folder))
 
@@ -73,22 +71,23 @@ class Model():
                 i += 1
             os.move(os.rename(os.path.join(self.directory, self.active_file), os.path.join(self.directory, catalog, f'{year} {lot} ({i})')))
 
-    def valdidate_catalog_entry(self, catalog):
-        if not Model.catalogs_pattern.search(catalog):
-            return False
-        return True
+    def parse_entry(self, entry, name):
+        if name == 'catalog':
+            if not Model.catalogs_pattern.search(entry):
+                return False
+            return True
 
-    def valdidate_lot_entry(self, lot):
-        if not self.catalogs_pattern.search(lot):
-            return False
-        return True
+        if name == 'lot':
+            if not self.catalogs_pattern.search(entry):
+                return False
+            return True
 
-    def valdidate_year_entry(self, year):
-        if year == '':
-            return False
-        elif type(year) == str:
-            year = int(year)
+        if name == 'year':
+            if entry == '':
+                return False
+            elif type(entry) == str:
+                entry = int(entry)
 
-        if year > datetime.date.today().year - Model.retention_years:
-            return False
-        return True
+            if entry > datetime.date.today().year - Model.retention_years:
+                raise WithinRetentionPeriodError()
+            return True
