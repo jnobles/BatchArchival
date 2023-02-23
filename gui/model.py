@@ -4,12 +4,22 @@ import fitz
 import datetime
 import tempfile
 
-class NoFilesFoundError(Exception):
+class ArchivalModelError(Exception):
     pass
 
-
-class WithinRetentionPeriodError(Exception):
+class NoFilesFoundError(ArchivalModelError):
     pass
+
+class WithinRetentionPeriodError(ArchivalModelError):
+    pass
+
+class InvalidEntryError(ArchivalModelError):
+    def __init__(self, field, entry, message='Input does not match expected form.'):
+        self.field = field
+        self.entry = entry
+        self.message = message
+        super().__init__(self.message)
+
 
 class Model():
     # Regex matching strings
@@ -60,34 +70,35 @@ class Model():
             self.active_file = None
             raise NoFilesFound(f'No .pdf files found in {self.directory}')
 
-    def move_active_file(self, catalog:str, lot:str, year:int):
-        if not os.exists(os.path.join(self.directory, catalog)):
-            os.mkdir(os.path.join(self.directory, catalog))
+    def move_active_file(self, catalog:str, lot:str, year:int, location='Archived Batches'):
+        if not os.path.exists(os.path.join(self.directory, location, catalog)):
+            os.mkdir(os.path.join(self.directory, location, catalog))
+
         try:
-            os.move(os.rename(os.path.join(self.directory, self.active_file), os.path.join(self.directory, catalog, f'{year} {lot}')))
+            os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, location, catalog, f'{year} {lot}.pdf'))
         except WindowsError:
             i = 1
-            while os.exists(os.path.join(self.directory, catalog, f'{year} {lot} ({i})')):
+            while os.path.exists(os.path.join(self.directory, catalog, f'{year} {lot} ({i})')):
                 i += 1
-            os.move(os.rename(os.path.join(self.directory, self.active_file), os.path.join(self.directory, catalog, f'{year} {lot} ({i})')))
+            os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, location, catalog, f'{year} {lot} ({i}).pdf'))
 
     def parse_entry(self, entry, name):
         if name == 'catalog':
-            if not Model.catalogs_pattern.search(entry):
-                return False
+            if entry == '':
+                raise InvalidEntryError(name, entry)
             return True
 
         if name == 'lot':
-            if not self.catalogs_pattern.search(entry):
-                return False
+            if entry == '':
+                raise InvalidEntryError(name, entry)
             return True
 
         if name == 'year':
-            if entry == '':
-                return False
-            elif type(entry) == str:
+            try:
                 entry = int(entry)
-
-            if entry > datetime.date.today().year - Model.retention_years:
-                raise WithinRetentionPeriodError()
+            except ValueError:
+                raise InvalidEntryError(name, entry)
+            else:
+                if int(entry) > datetime.date.today().year - Model.retention_years:
+                    raise WithinRetentionPeriodError()
             return True
