@@ -41,8 +41,12 @@ class Controller():
                 self.view.entries['catalog'][1].get(),
                 self.view.entries['lot'][1].get(),
                 self.view.entries['year'][1].get())
-            self.model.get_next_file()
-            self.view.preview.set_image(self.model.active_file[1])
+            try:
+                self.model.get_next_file()
+            except NoFilesFoundError:
+                self.view.preview.hide()
+            else:
+                self.view.preview.set_image(self.model.active_file[1])
             self.clear_all_entries()
             self.update_status_files_remaining()
             self.update_button_states()

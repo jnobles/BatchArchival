@@ -68,7 +68,7 @@ class Model():
             self.active_file = self.file_list.pop(0)
         except IndexError:
             self.active_file = None
-            raise NoFilesFound(f'No .pdf files found in {self.directory}')
+            raise NoFilesFoundError(f'No .pdf files found in {self.directory}')
 
     def move_active_file(self, catalog:str, lot:str, year:int, location='Archived Batches'):
         if not os.path.exists(os.path.join(self.directory, location, catalog)):
