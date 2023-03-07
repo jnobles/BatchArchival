@@ -26,10 +26,10 @@ class Controller():
             tkpopup.showwarning(title='Still Within Retetion Period', 
                                 message='All batch records must be kept for 7 years from ' +
                                 'completion.  Return this file to the ISO room. Do not archive.')
-            catalog = self.view.entries['catalog'][1].get() if self.view.entries['catalog'][1].get() != '' else 'cat'
-            lot = self.view.entries['lot'][1].get() if self.view.entries['lot'][1].get() != '' else 'lot'
+            catalog = self.view.entries['catalog'][1].get()
+            lot = self.view.entries['lot'][1].get()
             year = self.view.entries['year'][1].get()
-            self.model.move_active_file(catalog, lot, year, location='RETURN TO FILING ROOM')
+            self.model.move_active_file(catalog, lot, year, invalid=True)
             self.model.get_next_file()
             self.view.preview.set_image(self.model.active_file[1])
             self.clear_all_entries()
@@ -98,8 +98,9 @@ class Controller():
 
 if __name__ == '__main__':
     try:
-        import pyi_splash
+        import pyi_splash, time
         pyi_splash.update_text('UI Loaded ...')
+        time.sleep(1)
         pyi_splash.close()
     except:
         pass

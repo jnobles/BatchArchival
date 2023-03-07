@@ -39,10 +39,6 @@ class Model():
         else:
             self.active_file = None
 
-        for folder in ['Archived Batches', 'RETURN TO FILING ROOM']:
-            if not os.path.exists(os.path.join(self.directory, folder)):
-                os.mkdir(os.path.join(self.directory, folder))
-
     def get_input_files(self):
         file_list = os.listdir(self.directory)
         r = re.compile(Model.file_type_pattern)
@@ -70,17 +66,25 @@ class Model():
             self.active_file = None
             raise NoFilesFoundError(f'No .pdf files found in {self.directory}')
 
-    def move_active_file(self, catalog:str, lot:str, year:int, location='Archived Batches'):
-        if not os.path.exists(os.path.join(self.directory, location, catalog, 'Archived Batches')):
-            os.mkdir(os.path.join(self.directory, location, catalog, 'Archived Batches'))
-
-        try:
-            os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, location, catalog, 'Archived Batches', f'{year} {lot}.pdf'))
-        except WindowsError:
-            i = 1
-            while os.path.exists(os.path.join(self.directory, catalog, 'Archived Batches', f'{year} {lot} ({i})')):
-                i += 1
-            os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, location, catalog, 'Archived Batches', f'{year} {lot} ({i}).pdf'))
+    def move_active_file(self, catalog:str, lot:str, year:int, invalid=False):
+        if invalid:
+            os.makedirs(os.path.join(self.directory, '_RETURN TO FILING ROOL'), exist_ok=True)
+            try:
+                os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, '_RETURN TO FILING ROOL', f'{year} {lot}.pdf'))
+            except WindowsError:
+                i = 1
+                while os.path.exists(os.path.join(self.directory, '_RETURN TO FILING ROOL', f'{year} {lot} ({i}).pdf')):
+                    i += 1
+                os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, '_RETURN TO FILING ROOL', f'{year} {lot} ({i}).pdf'))
+        else:
+            os.makedirs(os.path.join(self.directory, catalog, 'Historical Data Batch Records, Rev History, etc'), exist_ok=True)
+            try:
+                os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, catalog, 'Historical Data Batch Records, Rev History, etc', f'{year} {lot}.pdf'))
+            except WindowsError:
+                i = 1
+                while os.path.exists(os.path.join(self.directory, catalog, 'Historical Data Batch Records, Rev History, etc', f'{year} {lot} ({i}).pdf')):
+                    i += 1
+                os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, catalog, 'Historical Data Batch Records, Rev History, etc', f'{year} {lot} ({i}).pdf'))
 
     def parse_entry(self, entry, name):
         if name == 'catalog':
