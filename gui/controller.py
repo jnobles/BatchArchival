@@ -103,8 +103,21 @@ if __name__ == '__main__':
         pyi_splash.close()
     except:
         pass
-
-    view = MainView()
-    model = Model()
-    app = Controller(model, view)
-    app.run()
+    try:
+        view = MainView()
+        model = Model()
+        app = Controller(model, view)
+        app.run()
+    except:
+        view.destroy()
+        import traceback, tkinter as tk
+        window = tk.Tk()
+        window.title('Unhandled Error')
+        tk.Label(window, text='The following error occured and was not handled:').pack(side=tk.TOP, fill=tk.BOTH)
+        error_text = tk.Text(window, wrap='none')
+        error_text.insert('1.0', ''.join(traceback.format_exc()))
+        error_text.config(state='disabled')
+        error_text.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+        window.geometry('900x400')
+        window.eval('tk::PlaceWindow . center')
+        window.mainloop()
