@@ -71,16 +71,16 @@ class Model():
             raise NoFilesFoundError(f'No .pdf files found in {self.directory}')
 
     def move_active_file(self, catalog:str, lot:str, year:int, location='Archived Batches'):
-        if not os.path.exists(os.path.join(self.directory, location, catalog)):
-            os.mkdir(os.path.join(self.directory, location, catalog))
+        if not os.path.exists(os.path.join(self.directory, location, catalog, 'Archived Batches')):
+            os.mkdir(os.path.join(self.directory, location, catalog, 'Archived Batches'))
 
         try:
-            os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, location, catalog, f'{year} {lot}.pdf'))
+            os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, location, catalog, 'Archived Batches', f'{year} {lot}.pdf'))
         except WindowsError:
             i = 1
-            while os.path.exists(os.path.join(self.directory, catalog, f'{year} {lot} ({i})')):
+            while os.path.exists(os.path.join(self.directory, catalog, 'Archived Batches', f'{year} {lot} ({i})')):
                 i += 1
-            os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, location, catalog, f'{year} {lot} ({i}).pdf'))
+            os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, location, catalog, 'Archived Batches', f'{year} {lot} ({i}).pdf'))
 
     def parse_entry(self, entry, name):
         if name == 'catalog':
