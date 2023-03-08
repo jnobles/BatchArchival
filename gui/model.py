@@ -30,14 +30,17 @@ class Model():
     retention_years = 7
 
     def __init__(self):
+        self.is_initializing = True
         self.directory = os.path.dirname(os.path.realpath(sys.argv[0]))
         self.file_list = self.get_input_files()
         if len(self.file_list) != 0:
             self.cache_dir = tempfile.TemporaryDirectory()
+            self.files_cached = 0
             self.cache_previews()
             self.active_file = self.file_list.pop(0)
         else:
             self.active_file = None
+        self.is_initializing = False
 
     def get_input_files(self):
         file_list = os.listdir(self.directory)
@@ -46,6 +49,11 @@ class Model():
 
     def cache_previews(self):
         for i, file in enumerate(self.file_list):
+            try:
+                import pyi_splash
+                pyi_splash.update_text(f'Preparing file {self.files_cached+1} of {len(self.file_list)}.')
+            except Exception as e:
+                print(e)
             fullpath = os.path.join(self.directory, file)
             doc = fitz.open(fullpath)
             page = doc.load_page(0)
@@ -53,6 +61,7 @@ class Model():
             preview_path = os.path.join(self.cache_dir.name, file.split('.')[0]+'.png')
             self.file_list[i] = (self.file_list[i], preview_path)
             pix.save(preview_path, output='png')
+            self.files_cached += 1
 
     def cleanup_cache(self):
         self.cache_dir.cleanup()

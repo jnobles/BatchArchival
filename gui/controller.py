@@ -97,16 +97,17 @@ class Controller():
 
 
 if __name__ == '__main__':
+    model = None
     try:
         import pyi_splash, time
         pyi_splash.update_text('UI Loaded ...')
         time.sleep(1)
+        model = Model()
         pyi_splash.close()
     except:
-        pass
+        model = Model()
     try:
         view = MainView()
-        model = Model()
         app = Controller(model, view)
         app.run()
     except:
