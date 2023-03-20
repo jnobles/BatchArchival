@@ -85,14 +85,14 @@ class Model():
                     i += 1
                 os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, '_RETURN TO FILING ROOL', f'{year} {lot} ({i}).pdf'))
         else:
-            os.makedirs(os.path.join(self.directory, catalog, 'Historical Data Batch Records, Rev History, etc'), exist_ok=True)
+            os.makedirs(os.path.join(self.directory, catalog), exist_ok=True)
             try:
-                os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, catalog, 'Historical Data Batch Records, Rev History, etc', f'{year} {lot}.pdf'))
+                os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, catalog, f'{year} {lot}.pdf'))
             except WindowsError:
                 i = 1
-                while os.path.exists(os.path.join(self.directory, catalog, 'Historical Data Batch Records, Rev History, etc', f'{year} {lot} ({i}).pdf')):
+                while os.path.exists(os.path.join(self.directory, catalog, f'{year} {lot} ({i}).pdf')):
                     i += 1
-                os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, catalog, 'Historical Data Batch Records, Rev History, etc', f'{year} {lot} ({i}).pdf'))
+                os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, catalog, f'{year} {lot} ({i}).pdf'))
 
     def parse_entry(self, entry, name):
         if name == 'catalog':
