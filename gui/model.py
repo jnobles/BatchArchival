@@ -26,12 +26,11 @@ class Model():
     file_type_pattern = re.compile(r'.*\.pdf')
     catalogs_pattern = re.compile(r'(?:[0-9]|X|W)[0-9]{5}')
     lot_pattern = re.compile(r'(?:I|S|O|T|E|C)[A-Z][0-9]{4}|MBB[ABCD][0-9]{4}V?')
-
     retention_years = 7
 
-    def __init__(self):
+    def __init__(self, input_dir=os.path.realpath(sys.argv[0])):
         self.is_initializing = True
-        self.directory = os.path.dirname(os.path.realpath(sys.argv[0]))
+        self.directory = os.path.dirname(input_dir)
         self.file_list = self.get_input_files()
         if len(self.file_list) != 0:
             self.cache_dir = tempfile.TemporaryDirectory()

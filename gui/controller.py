@@ -59,6 +59,10 @@ class Controller():
         self.view.preview.set_image(self.model.active_file[1])
         self.view.preview.update_idletasks()
 
+    @staticmethod
+    def enforce_capital(var):
+        var.set(var.get().upper())
+
     def clear_all_entries(self):
         for field in [item[1] for item in self.view.entries.values()]:
             field.set('')
@@ -90,6 +94,8 @@ class Controller():
         self.view.buttons['skip'].configure(command=self.skip_handler)
         for entry in ['catalog', 'lot', 'year']:
             self.view.entries[entry][0].bind('<Return>', self.enter_handler)
+        for entry in ['catalog', 'lot']:
+            self.view.entries[entry][1].trace('w', lambda *_, var=self.view.entries[entry][1]: Controller.enforce_capital(var))
         self.view.bind('<FocusIn>', self.raise_all_windows)
         self.view.preview.bind('<FocusIn>', self.raise_all_windows)
         self.raise_all_windows()
