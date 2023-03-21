@@ -1,4 +1,5 @@
 import os, sys
+from pathlib import Path
 import re
 import fitz
 import datetime
@@ -28,39 +29,50 @@ class Model():
     lot_pattern = re.compile(r'(?:I|S|O|T|E|C)[A-Z][0-9]{4}|MBB[ABCD][0-9]{4}V?')
     retention_years = 7
 
-    def __init__(self, input_dir=os.path.realpath(sys.argv[0])):
-        self.is_initializing = True
-        self.directory = os.path.dirname(input_dir)
+    def __init__(self, input_dir=Path(__file__).parent):
+        self.directory = input_dir
         self.file_list = self.get_input_files()
         if len(self.file_list) != 0:
             self.cache_dir = tempfile.TemporaryDirectory()
-            self.files_cached = 0
             self.cache_previews()
             self.active_file = self.file_list.pop(0)
         else:
             self.active_file = None
-        self.is_initializing = False
+        print(self.file_list)
 
     def get_input_files(self):
-        file_list = os.listdir(self.directory)
-        r = re.compile(Model.file_type_pattern)
-        return list(filter(r.match, file_list))
+        # get list of all files in self.directory that match Model.file_type_pattern
+        # returns list of Path objects
+        file_list = [str(path) for path in self.directory.iterdir()]
+        file_list = list(filter(Model.file_type_pattern.match, file_list))
+        return [Path(file) for file in file_list]
 
     def cache_previews(self):
+        # if the script is running as a pyinstaller bundled executible, prepares method to provide
+        # progress updates on splash
+        # transforms self.file_list from list(Path(pdf)) to list(Path(pdf), Path(png))
+        try:
+            import pyi_splash
+            files_cached = 0
+        except ModuleNotFoundError:
+            pass
+
         for i, file in enumerate(self.file_list):
+            # sends updates to splash screen if exists, otherwise fails silently
             try:
-                import pyi_splash
-                pyi_splash.update_text(f'Preparing file {self.files_cached+1} of {len(self.file_list)}.')
-            except Exception as e:
-                print(e)
-            fullpath = os.path.join(self.directory, file)
+                pyi_splash.update_text(f'Preparing file {files_cached+1} of {len(self.file_list)}.')
+                files_cached += 1
+            except NameError:
+                pass
+
+            # the actual code doing the preparation of file previews
+            fullpath = self.directory / file
             doc = fitz.open(fullpath)
             page = doc.load_page(0)
             pix = page.get_pixmap()
-            preview_path = os.path.join(self.cache_dir.name, file.split('.')[0]+'.png')
+            preview_path = Path(self.cache_dir.name) / (file.stem+'.png')
             self.file_list[i] = (self.file_list[i], preview_path)
             pix.save(preview_path, output='png')
-            self.files_cached += 1
 
     def cleanup_cache(self):
         self.cache_dir.cleanup()
@@ -76,23 +88,23 @@ class Model():
 
     def move_active_file(self, catalog:str, lot:str, year:int, invalid=False):
         if invalid:
-            os.makedirs(os.path.join(self.directory, '_RETURN TO FILING ROOL'), exist_ok=True)
+            (self.directory / '_RETURN TO FILING ROOM').mkdir(exist_ok=True)
             try:
-                os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, '_RETURN TO FILING ROOL', f'{year} {lot}.pdf'))
+                self.active_file.rename(self.directory / '_RETURN TO FILING ROOM' / f'{year} {lot}.pdf')
             except WindowsError:
                 i = 1
-                while os.path.exists(os.path.join(self.directory, '_RETURN TO FILING ROOL', f'{year} {lot} ({i}).pdf')):
+                while (self.directory / '_RETURN TO FILING ROOM' / f'{year} {lot} ({i}).pdf').exists():
                     i += 1
-                os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, '_RETURN TO FILING ROOL', f'{year} {lot} ({i}).pdf'))
+                self.active_file.rename(self.directory / '_RETURN TO FILING ROOM', f'{year} {lot} ({i}).pdf')
         else:
-            os.makedirs(os.path.join(self.directory, catalog), exist_ok=True)
+            (self.directory / catalog).mkdir(exist_ok=True)
             try:
-                os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, catalog, f'{year} {lot}.pdf'))
+                self.active_file.rename(self.directory / catalog, f'{year} {lot}.pdf')
             except WindowsError:
                 i = 1
-                while os.path.exists(os.path.join(self.directory, catalog, f'{year} {lot} ({i}).pdf')):
+                while (self.directory / catalog / f'{year} {lot} ({i}).pdf').exists():
                     i += 1
-                os.rename(os.path.join(self.directory, self.active_file[0]), os.path.join(self.directory, catalog, f'{year} {lot} ({i}).pdf'))
+                self.active_file.rename(self.directory / catalog / f'{year} {lot} ({i}).pdf')
 
     def parse_entry(self, entry, name):
         if name == 'catalog':

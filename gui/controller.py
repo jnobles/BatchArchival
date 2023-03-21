@@ -110,7 +110,7 @@ if __name__ == '__main__':
         time.sleep(1)
         model = Model()
         pyi_splash.close()
-    except:
+    except ModuleNotFoundError:
         model = Model()
     try:
         view = MainView()
