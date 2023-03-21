@@ -89,22 +89,19 @@ class Model():
     def move_active_file(self, catalog:str, lot:str, year:int, invalid=False):
         if invalid:
             (self.directory / '_RETURN TO FILING ROOM').mkdir(exist_ok=True)
-            try:
-                self.active_file.rename(self.directory / '_RETURN TO FILING ROOM' / f'{year} {lot}.pdf')
-            except WindowsError:
+            file_target = Path(self.directory / '_RETURN TO FILING ROOM' / f'{year} {lot}.pdf')
+            while file_target.exists():
                 i = 1
-                while (self.directory / '_RETURN TO FILING ROOM' / f'{year} {lot} ({i}).pdf').exists():
-                    i += 1
-                self.active_file.rename(self.directory / '_RETURN TO FILING ROOM', f'{year} {lot} ({i}).pdf')
+                file_target = self.directory / '_RETURN TO FILING ROOM', f'{year} {lot} ({i}).pdf'
+            self.active_file.rename(file_target)
         else:
             (self.directory / catalog).mkdir(exist_ok=True)
-            try:
-                self.active_file.rename(self.directory / catalog, f'{year} {lot}.pdf')
-            except WindowsError:
-                i = 1
-                while (self.directory / catalog / f'{year} {lot} ({i}).pdf').exists():
-                    i += 1
-                self.active_file.rename(self.directory / catalog / f'{year} {lot} ({i}).pdf')
+            file_target = Path(self.directory / catalog, f'{year} {lot}.pdf')
+            while file_target.exists():
+                i += 1
+                file_target = self.directory / catalog / f'{year} {lot} ({i}).pdf'
+            self.active_file.rename(file_target)
+
 
     def parse_entry(self, entry, name):
         if name == 'catalog':
