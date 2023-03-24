@@ -3,6 +3,7 @@ from model import Model
 from model import ArchivalModelError, NoFilesFoundError, WithinRetentionPeriodError, InvalidEntryError
 import tkinter.messagebox as tkpopup
 import fitz
+from pathlib import Path
 
 class Controller():
     def __init__(self, model, view):
@@ -23,7 +24,7 @@ class Controller():
             self.view.entries[entry][0].configure(highlightthickness=2)
             return
         except WithinRetentionPeriodError:
-            tkpopup.showwarning(title='Still Within Retetion Period', 
+            tkpopup.showwarning(title='Still Within Retetion Period',
                                 message='All batch records must be kept for 7 years from ' +
                                 'completion.  Return this file to the ISO room. Do not archive.')
             catalog = self.view.entries['catalog'][1].get()
@@ -103,19 +104,27 @@ class Controller():
 
 
 if __name__ == '__main__':
-    model = None
+    # prodvides splash screen information for model initilization
+    # when run as a pyinstaller bundled executible
+    input_dir = Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc/zToBeProcessed')
+    output_dir = Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc')
     try:
         import pyi_splash, time
         pyi_splash.update_text('UI Loaded ...')
         time.sleep(1)
-        model = Model()
+        model = Model(input_dir=input_dir, output_dir=output_dir)
         pyi_splash.close()
     except ModuleNotFoundError:
-        model = Model()
+        model = Model(input_dir=input_dir, output_dir=output_dir)
+    except PermissionError:
+        tkpopup.showerror(title='Insufficient Permissions', text='You do not have sufficient privilages to the Archival Folders.  Exiting.')
+
+    # program mainloop
     try:
         view = MainView()
         app = Controller(model, view)
         app.run()
+    # display error trace in new tkinter window when encountering unhandled fatal error
     except:
         view.destroy()
         import traceback, tkinter as tk
@@ -129,3 +138,5 @@ if __name__ == '__main__':
         window.geometry('900x400')
         window.eval('tk::PlaceWindow . center')
         window.mainloop()
+    finally:
+        model.cleanup_cache()
