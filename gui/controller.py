@@ -4,6 +4,7 @@ from model import ArchivalModelError, NoFilesFoundError, WithinRetentionPeriodEr
 import tkinter.messagebox as tkpopup
 import fitz
 from pathlib import Path
+from filelock import FileLock, FileLockExistsException
 
 class Controller():
     def __init__(self, model, view):
@@ -102,41 +103,69 @@ class Controller():
         self.raise_all_windows()
         self.view.mainloop()
 
-
-if __name__ == '__main__':
+def prepare_model():
     # prodvides splash screen information for model initilization
-    # when run as a pyinstaller bundled executible
+    # when run as a pyinstaller bundled executible, otherwise simply
+    # initializes and returns a model object
     input_dir = Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc/zToBeProcessed')
     output_dir = Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc')
-    try:
-        import pyi_splash, time
-        pyi_splash.update_text('UI Loaded ...')
-        time.sleep(1)
-        model = Model(input_dir=input_dir, output_dir=output_dir)
-        pyi_splash.close()
-    except ModuleNotFoundError:
-        model = Model(input_dir=input_dir, output_dir=output_dir)
-    except PermissionError:
-        tkpopup.showerror(title='Insufficient Permissions', text='You do not have sufficient privilages to the Archival Folders.  Exiting.')
+    #input_dir = Path('S:/Production Groups/MPR')
+    #output_dir = Path('S:/Production Groups/MPR')
 
-    # program mainloop
     try:
+        import pyi_splash
+    except ModuleNotFoundError:
+        pass
+
+    try:        
+        model = Model(input_dir=input_dir, output_dir=output_dir)
+    except PermissionError as e:
+        try:
+            pyi_splash.close()
+        except NameError:
+            pass
+        raise PermissionError from e
+
+    try:
+        pyi_splash.close()
+    except NameError:
+        pass
+
+    return model
+
+@FileLock.lock(Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc/zToBeProcessed/running.lock'))
+def run_app():
+    model = prepare_model()
+    if model is not None:
         view = MainView()
         app = Controller(model, view)
         app.run()
-    # display error trace in new tkinter window when encountering unhandled fatal error
-    except:
-        view.destroy()
-        import traceback, tkinter as tk
-        window = tk.Tk()
-        window.title('Unhandled Error')
-        tk.Label(window, text='The following error occured and was not handled:').pack(side=tk.TOP, fill=tk.BOTH)
-        error_text = tk.Text(window, wrap='none')
-        error_text.insert('1.0', ''.join(traceback.format_exc()))
-        error_text.config(state='disabled')
-        error_text.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
-        window.geometry('900x400')
-        window.eval('tk::PlaceWindow . center')
-        window.mainloop()
-    finally:
-        model.cleanup_cache()
+
+if __name__ == '__main__':
+    try:
+        run_app()
+    except Exception as e:
+        try:
+            import pyi_splash
+            pyi_splash.close()
+        except (ModuleNotFoundError, NameError):
+            pass
+        if type(e) == PermissionError:
+            tkpopup.showerror(title='Insufficient Permissions', message='You do not have sufficient privilages to the Archival Folders.  Exiting.')
+        elif type(e) == FileLockExistsException:
+            tkpopup.showerror(title='Process Locked',
+                              message='Batch Archival Assistant is already running on another computer. Running multiple instances of this program could result in errors.' +
+                                    f'\n\nThe current locking instance was started by {e.created_by} at {e.created_on}.')
+        else: # display error trace in new tkinter window when encountering unhandled fatal error
+            import traceback, tkinter as tk
+            window = tk.Tk()
+            window.title('Unhandled Error')
+            tk.Label(window, text='The following error occured and was not handled:').pack(side=tk.TOP, fill=tk.BOTH)
+            error_text = tk.Text(window, wrap='none')
+            error_text.insert('1.0', ''.join(traceback.format_exc()))
+            error_text.config(state='disabled')
+            error_text.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+            window.geometry('900x400')
+            window.eval('tk::PlaceWindow . center')
+            window.mainloop()
+

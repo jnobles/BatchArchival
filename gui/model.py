@@ -16,11 +16,11 @@ class WithinRetentionPeriodError(ArchivalModelError):
 
 class InvalidEntryError(ArchivalModelError):
     def __init__(self, field, entry, message='Input does not match expected form.'):
+        super().__init__(message)
         self.field = field
         self.entry = entry
         self.message = message
-        super().__init__(self.message)
-
+        
 
 class Model():
     # Regex matching strings
