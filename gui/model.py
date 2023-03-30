@@ -101,11 +101,12 @@ class Model():
             raise NoFilesFoundError(f'No .pdf files found in {self.input_dir}')
 
     def move_active_file(self, catalog:str, lot:str, year:int, invalid=False):
+        i = 1
         if invalid:
             (self.output_dir / '_RETURN TO FILING ROOM').mkdir(exist_ok=True)
             file_target = Path(self.output_dir / '_RETURN TO FILING ROOM' / f'{year} {lot}.pdf')
             while file_target.exists():
-                i = 1
+                i += 1
                 file_target = self.output_dir / '_RETURN TO FILING ROOM', f'{year} {lot} ({i}).pdf'
             self.active_file[0].rename(file_target)
         else:
