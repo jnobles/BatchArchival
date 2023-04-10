@@ -120,12 +120,12 @@ class Model():
 
     def parse_entry(self, entry, name):
         if name == 'catalog':
-            if entry == '':
+            if not re.match(Model.catalogs_pattern, entry):
                 raise InvalidEntryError(name, entry)
             return True
 
         if name == 'lot':
-            if entry == '':
+            if not re.match(Model.lot_pattern, entry):
                 raise InvalidEntryError(name, entry)
             return True
 
@@ -135,6 +135,6 @@ class Model():
             except ValueError:
                 raise InvalidEntryError(name, entry)
             else:
-                if int(entry) > datetime.date.today().year - Model.retention_years:
+                if int(entry) >= datetime.date.today().year - Model.retention_years:
                     raise WithinRetentionPeriodError()
             return True
