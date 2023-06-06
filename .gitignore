@@ -1,5 +1,4 @@
-/venv/
-/build/
-/dist/
-*.sublime*
 __pycache__/
+
+build/
+dist/

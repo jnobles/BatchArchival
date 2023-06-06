@@ -102,3 +102,7 @@ class PreviewPane(tk.Toplevel):
 
     def on_leave(self, evt):
         self.unbind('<MouseWheel>')
+
+if __name__ == '__main__':
+    view = MainView()
+    view.mainloop()

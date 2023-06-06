@@ -25,8 +25,8 @@ class InvalidEntryError(ArchivalModelError):
 class Model():
     # Regex matching strings
     file_type_pattern = re.compile(r'.*\.pdf')
-    catalogs_pattern = re.compile(r'(?:[0-9]|X|W)[0-9]{5}')
-    lot_pattern = re.compile(r'(?:I|S|O|T|E|C)[A-Z][0-9]{4}|MBB[ABCD][0-9]{4}V?')
+    catalogs_pattern = re.compile(r'(?:[0-9]|[XWQ])[0-9]{5}')
+    lot_pattern = re.compile(r'(?:[ISOTEC])[A-Z][0-9]{4}|MBB[ABCD][0-9]{4}V?')
     retention_years = 7
 
     @staticmethod

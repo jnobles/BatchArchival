@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['gui\\controller.py'],
+    ['controller.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -19,9 +19,18 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False,
 )
+
+# for some reason pywintypes is included in both the root and pywin32_system32
+# folders.  This causes failed imports and crash.  The root dll must be manually
+# excluded
+a.binaries = a.binaries - TOC([
+    ('pywintypes310.dll', None, None),
+    ('pythoncom310.dll', None, None)
+])
+
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 splash = Splash(
-    'gui/splash.png',
+    'splash.png',
     binaries=a.binaries,
     datas=a.datas,
     text_pos=(10, 55),

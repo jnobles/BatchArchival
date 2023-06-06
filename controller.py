@@ -107,7 +107,7 @@ def prepare_model():
     # prodvides splash screen information for model initilization
     # when run as a pyinstaller bundled executible, otherwise simply
     # initializes and returns a model object
-    input_dir = Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc/zToBeProcessed')
+    input_dir = Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc/_ArchivalTools/ToBeProcessed')
     output_dir = Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc')
     #input_dir = Path('S:/Production Groups/MPR')
     #output_dir = Path('S:/Production Groups/MPR')
@@ -117,7 +117,7 @@ def prepare_model():
     except ModuleNotFoundError:
         pass
 
-    try:        
+    try:
         model = Model(input_dir=input_dir, output_dir=output_dir)
     except PermissionError as e:
         try:
@@ -133,7 +133,7 @@ def prepare_model():
 
     return model
 
-@FileLock.lock(Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc/zToBeProcessed/running.lock'))
+@FileLock.lock(Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc/_ArchivalTools/ToBeProcessed/running.lock'))
 def run_app():
     model = prepare_model()
     if model is not None:
