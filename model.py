@@ -12,15 +12,7 @@ class NoFilesFoundError(ArchivalModelError):
     pass
 
 class WithinRetentionPeriodError(ArchivalModelError):
-    pass
-
-class InvalidEntryError(ArchivalModelError):
-    def __init__(self, field, entry, message='Input does not match expected form.'):
-        super().__init__(message)
-        self.field = field
-        self.entry = entry
-        self.message = message
-        
+    pass        
 
 class Model():
     # Regex matching strings
@@ -118,23 +110,23 @@ class Model():
             self.active_file[0].rename(file_target)
 
 
-    def parse_entry(self, entry, name):
+    def validate_entry(self, entry, name):
         if name == 'catalog':
             if not re.match(Model.catalogs_pattern, entry):
-                raise InvalidEntryError(name, entry)
+                return False
             return True
 
         if name == 'lot':
             if not re.match(Model.lot_pattern, entry):
-                raise InvalidEntryError(name, entry)
+                return False
             return True
 
         if name == 'year':
             try:
                 entry = int(entry)
             except ValueError:
-                raise InvalidEntryError(name, entry)
+                return False
             else:
                 if int(entry) >= datetime.date.today().year - Model.retention_years:
-                    raise WithinRetentionPeriodError()
+                    return False
             return True

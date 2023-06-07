@@ -1,10 +1,12 @@
 import tkinter as tk
+from tkinter import ttk
 
 class MainView(tk.Tk):
-    font = {'font': ('Arial', 14)}
-
     def __init__(self):
         super().__init__()
+        self.style = ttk.Style()
+        self.style.theme_use('winnative')
+        self.style.configure('Invalid.TEntry', fieldbackground='red')
         self.buttons = {}
         self.entries = {}
         self.status = None
@@ -12,13 +14,13 @@ class MainView(tk.Tk):
         self.preview = PreviewPane(self)
 
     def create_label(self, parent, text, row, col, rowspan=1, colspan=1, anchor=tk.CENTER):
-        label = tk.Label(parent, text=text, anchor=anchor, **MainView.font)
+        label = ttk.Label(parent, text=text, anchor=anchor)
         settings = {'row':row, 'column':col, 'rowspan':rowspan, 'columnspan':colspan,
                     'sticky':tk.NSEW}
         label.grid(**settings)
 
     def create_button(self, parent, name, text, row, col, rowspan=1, colspan=1):
-        button = tk.Button(parent, text=text, **MainView.font)
+        button = ttk.Button(parent, text=text)
         self.buttons[name] = button
         settings = {'row':row, 'column':col, 'rowspan':rowspan, 'columnspan':colspan,
                     'sticky':tk.NSEW, 'padx':2, 'pady':2}
@@ -26,7 +28,7 @@ class MainView(tk.Tk):
 
     def create_entry(self, parent, name, row, col, rowspan=1, colspan=1):
         stringVar = tk.StringVar()
-        entry = tk.Entry(parent, textvariable=stringVar, highlightbackground='red', highlightcolor='red', **MainView.font)
+        entry = ttk.Entry(parent, textvariable=stringVar)
         self.entries[name] = (entry, stringVar)
         settings = {'row':row, 'column':col, 'rowspan':rowspan, 'columnspan':colspan,
                     'sticky':tk.NSEW, 'padx':2, 'pady':2}
@@ -35,25 +37,23 @@ class MainView(tk.Tk):
     def create_main_window(self):
         self.create_label(self, 'Catalog Number', 0, 0, anchor=tk.E)
         self.create_entry(self, 'catalog', 0, 1)
-
         self.create_label(self, 'Lot Number', 1, 0, anchor=tk.E)
         self.create_entry(self, 'lot', 1, 1)
-
         self.create_label(self, 'Release Year', 2, 0, anchor=tk.E)
         self.create_entry(self, 'year', 2, 1)
-
         self.create_button(self, 'enter', 'Enter', 0, 2)
         self.create_button(self, 'skip', 'Skip', 1, 2)
         self.create_button(self, 'exit', 'Exit', 2, 2)
+
         self.buttons['exit'].configure(command=self.winfo_toplevel().destroy)
+
         self.status = tk.StringVar()
-        status_label = tk.Label(self, textvariable=self.status, anchor=tk.W, relief=tk.RIDGE)
+        status_label = ttk.Label(self, textvariable=self.status, anchor=tk.W, relief=tk.RIDGE)
         status_label.grid(row=self.grid_size()[0], column=0, columnspan=self.grid_size()[1], sticky=tk.NSEW)
 
         self.resizable(False, False)
-        self.title('ISOTEC Batch Archival Assistant')
+        self.title('Batch Archival Assistant')
         self.eval('tk::PlaceWindow . center')
-
 
 from PIL import ImageTk, Image
 class PreviewPane(tk.Toplevel):
@@ -64,7 +64,7 @@ class PreviewPane(tk.Toplevel):
 
         self.display = tk.Canvas(self)
         self.display.grid(row=0, column=0, sticky=tk.NSEW)
-        v_scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL)
+        v_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         v_scrollbar.grid(row=0, column=1, sticky=tk.NS)
@@ -105,4 +105,6 @@ class PreviewPane(tk.Toplevel):
 
 if __name__ == '__main__':
     view = MainView()
+    view.buttons['skip'].configure(command=lambda:view.entries['lot'][0].configure(style='Invalid.TEntry'))
+    view.buttons['enter'].configure(command=lambda:view.entries['lot'][0].configure(style='TEntry'))
     view.mainloop()
