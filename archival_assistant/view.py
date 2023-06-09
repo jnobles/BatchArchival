@@ -14,24 +14,24 @@ class MainView(tk.Tk):
     def set_stylings(self):
         self.style = ttk.Style()
         self.style.theme_use('winnative')
-        self.style.configure('TButton', font=('Arial', 14))
-        self.style.configure('TEntry', font=('Arial', 14))
-        self.style.configure('TLabel', font=('Arial', 14))
 
+        # global changes
+        for element in ['TButton', 'TEntry', 'TLabel']:
+            self.style.configure(element, font=('Arial', 14))
+            self.style.configure(element, padx=2, pady=2)
+            self.style.configure(element, sticky='NSEW')
+
+        # individual stylings
         self.style.configure('Invalid.TEntry', fieldbackground='red')
 
     def create_label(self, parent, text, row, col, rowspan=1, colspan=1, anchor=tk.CENTER):
         label = ttk.Label(parent, text=text, anchor=anchor)
-        settings = {'row':row, 'column':col, 'rowspan':rowspan, 'columnspan':colspan,
-                    'sticky':tk.NSEW}
-        label.grid(**settings)
+        label.grid(row=row, column=col, rowspan=rowspan, columnspan=colspan)
 
     def create_button(self, parent, name, text, row, col, rowspan=1, colspan=1):
         button = ttk.Button(parent, text=text)
         self.buttons[name] = button
-        settings = {'row':row, 'column':col, 'rowspan':rowspan, 'columnspan':colspan,
-                    'sticky':tk.NSEW, 'pady':2}
-        button.grid(**settings)
+        button.grid(row=row, column=col, rowspan=rowspan, columnspan=colspan)
 
     def create_entry(self, parent, name, row, col, rowspan=1, colspan=1):
         stringVar = tk.StringVar()
@@ -39,9 +39,7 @@ class MainView(tk.Tk):
         # for some reason, ttk.Entry font cannot be directly styled via ttk.Style(), the font=self.style.lookup("TEntry", "font")
         # workaround is curtosy of j123b567 on StackOverflow
         self.entries[name] = (entry, stringVar)
-        settings = {'row':row, 'column':col, 'rowspan':rowspan, 'columnspan':colspan,
-                    'sticky':tk.NSEW, 'padx':2, 'pady':2}
-        entry.grid(**settings)
+        entry.grid(row=row, column=col, rowspan=rowspan, columnspan=colspan)
 
     def create_main_window(self):
         self.create_label(self, 'Catalog Number', 0, 0, anchor=tk.E)
