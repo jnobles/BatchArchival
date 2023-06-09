@@ -4,14 +4,21 @@ from tkinter import ttk
 class MainView(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.style = ttk.Style()
-        self.style.theme_use('winnative')
-        self.style.configure('Invalid.TEntry', fieldbackground='red')
+        self.set_stylings()
         self.buttons = {}
         self.entries = {}
         self.status = None
         self.create_main_window()
         self.preview = PreviewPane(self)
+
+    def set_stylings(self):
+        self.style = ttk.Style()
+        self.style.theme_use('winnative')
+        self.style.configure('TButton', font=('Arial', 14))
+        self.style.configure('TEntry', font=('Arial', 14))
+        self.style.configure('TLabel', font=('Arial', 14))
+
+        self.style.configure('Invalid.TEntry', fieldbackground='red')
 
     def create_label(self, parent, text, row, col, rowspan=1, colspan=1, anchor=tk.CENTER):
         label = ttk.Label(parent, text=text, anchor=anchor)
@@ -23,12 +30,14 @@ class MainView(tk.Tk):
         button = ttk.Button(parent, text=text)
         self.buttons[name] = button
         settings = {'row':row, 'column':col, 'rowspan':rowspan, 'columnspan':colspan,
-                    'sticky':tk.NSEW, 'padx':2, 'pady':2}
+                    'sticky':tk.NSEW, 'pady':2}
         button.grid(**settings)
 
     def create_entry(self, parent, name, row, col, rowspan=1, colspan=1):
         stringVar = tk.StringVar()
-        entry = ttk.Entry(parent, textvariable=stringVar)
+        entry = ttk.Entry(parent, textvariable=stringVar, font=self.style.lookup("TEntry", "font"))
+        # for some reason, ttk.Entry font cannot be directly styled via ttk.Style(), the font=self.style.lookup("TEntry", "font")
+        # workaround is curtosy of j123b567 on StackOverflow
         self.entries[name] = (entry, stringVar)
         settings = {'row':row, 'column':col, 'rowspan':rowspan, 'columnspan':colspan,
                     'sticky':tk.NSEW, 'padx':2, 'pady':2}
