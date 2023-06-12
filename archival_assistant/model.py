@@ -128,5 +128,5 @@ class Model():
                 return False
             else:
                 if int(entry) >= datetime.date.today().year - Model.retention_years:
-                    return False
+                    raise WithinRetentionPeriodError()
             return True

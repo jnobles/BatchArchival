@@ -34,22 +34,21 @@ class Controller():
             self.clear_all_entries()
             self.update_status_files_remaining()
             self.update_button_states()
-
-
-        if self.model.validate_entry(self.view.entries['catalog'][1].get(), 'catalog'):
-            self.view.entries['catalog'][0].configure(style='TEntry')
         else:
-            self.view.entries['catalog'][0].configure(style='Invalid.TEntry')
+            if self.model.validate_entry(self.view.entries['catalog'][1].get(), 'catalog'):
+                self.view.entries['catalog'][0].configure(style='TEntry')
+            else:
+                self.view.entries['catalog'][0].configure(style='Invalid.TEntry')
 
-        if self.model.validate_entry(self.view.entries['lot'][1].get(), 'lot'):
-            self.view.entries['lot'][0].configure(style='TEntry')
-        else:
-            self.view.entries['lot'][0].configure(style='Invalid.TEntry')
+            if self.model.validate_entry(self.view.entries['lot'][1].get(), 'lot'):
+                self.view.entries['lot'][0].configure(style='TEntry')
+            else:
+                self.view.entries['lot'][0].configure(style='Invalid.TEntry')
 
-        if self.model.validate_entry(self.view.entries['year'][1].get(), 'year'):
-            self.view.entries['year'][0].configure(style='TEntry')
-        else:
-            self.view.entries['year'][0].configure(style='Invalid.TEntry')
+            if self.model.validate_entry(self.view.entries['year'][1].get(), 'year'):
+                self.view.entries['year'][0].configure(style='TEntry')
+            else:
+                self.view.entries['year'][0].configure(style='Invalid.TEntry')
 
 
         if all([self.model.validate_entry(self.view.entries['catalog'][1].get(), 'catalog'), self.model.validate_entry(self.view.entries['lot'][1].get(), 'lot'), self.model.validate_entry(self.view.entries['year'][1].get(), 'year')]):
