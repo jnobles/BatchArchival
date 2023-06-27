@@ -1,7 +1,15 @@
 import tkinter as tk
 from tkinter import ttk
 
+
+
 class MainView(tk.Tk):
+    @classmethod
+    def press_focused_button(self, event):
+        event.widget.state(['pressed'])
+        event.widget.invoke()
+        event.widget.after(100, lambda: event.widget.state(['!pressed']))
+
     def __init__(self):
         super().__init__()
         self.set_stylings()
@@ -23,6 +31,9 @@ class MainView(tk.Tk):
 
         # individual stylings
         self.style.configure('Invalid.TEntry', fieldbackground='red')
+
+        # Add <Enter> as a button for activating focused button
+        self.bind_class('TButton', '<Return>', MainView.press_focused_button)    
 
     def create_label(self, parent, text, row, col, rowspan=1, colspan=1, anchor=tk.CENTER):
         label = ttk.Label(parent, text=text, anchor=anchor)
@@ -62,6 +73,7 @@ class MainView(tk.Tk):
         self.title('Batch Archival Assistant')
         self.eval('tk::PlaceWindow . center')
 
+        
 from PIL import ImageTk, Image
 class PreviewPane(tk.Toplevel):
     def __init__(self, parent):
