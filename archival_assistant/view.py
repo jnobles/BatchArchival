@@ -126,11 +126,12 @@ class PreviewPane(tk.Toplevel):
 class CalloutWindow():
     def __init__(self, root):
         self.root = root
+        self.image = None
         self.callout = None
+        
 
     def show(self, event):
         if self.callout is None:
-            from pathlib import Path
             self.image = ImageTk.PhotoImage(Image.open(Path('../_test_assets/sample_batch.png').resolve()))
             self.callout = ttk.Label(self.root.preview, image=self.image, relief='solid')
             self.callout.place(x=0, y=0, width=150, height=150)
@@ -142,6 +143,21 @@ class CalloutWindow():
             self.image = None
 
     def update_position(self, event):
+        if self.callout is not None:
+            #from pathlib import Path
+            image = Image.open(Path('../_test_assets/sample_batch.png').resolve())
+            zoom_minx = event.x - 36
+            zoom_miny = event.y - 36
+            zoom_maxx = event.x + 36
+            zoom_maxy = event.y + 36
+            image = image.crop((zoom_minx, zoom_miny, zoom_maxx, zoom_maxy))
+            image = image.resize((150, 150))
+            self.image = ImageTk.PhotoImage(image)
+            self.callout.configure(image=self.image)
+            self.callout.image = self.image
+            #self.image = ImageTk.PhotoImage(image)
+            #self.root.update_idletasks()
+
         if self.callout is not None:
             window_width = self.root.preview.winfo_width()
             window_height = self.root.preview.winfo_height()
