@@ -122,8 +122,65 @@ class PreviewPane(tk.Toplevel):
     def on_leave(self, evt):
         self.unbind('<MouseWheel>')
 
+
+class CalloutWindow():
+    def __init__(self, root):
+        self.root = root
+        self.callout = None
+
+    def show(self, event):
+        if self.callout is None:
+            from pathlib import Path
+            self.image = ImageTk.PhotoImage(Image.open(Path('../_test_assets/sample_batch.png').resolve()))
+            self.callout = ttk.Label(self.root.preview, image=self.image, relief='solid')
+            self.callout.place(x=0, y=0, width=150, height=150)
+
+    def hide(self, event):
+        if self.callout is not None:
+            self.callout.destroy()
+            self.callout = None
+            self.image = None
+
+    def update_position(self, event):
+        if self.callout is not None:
+            window_width = self.root.preview.winfo_width()
+            window_height = self.root.preview.winfo_height()
+            popout_width = self.callout.winfo_width()
+            popout_height = self.callout.winfo_height()
+
+            popout_minx = event.x + 10
+            popout_miny = event.y + 10
+            popout_maxx = popout_width + popout_minx
+            popout_maxy = popout_height + popout_miny
+            
+
+            x_is_hidden = popout_maxx > window_width
+            y_is_hidden = popout_maxy > window_height
+
+            if x_is_hidden and y_is_hidden:
+                self.callout.place_configure(x=event.x-10-popout_width, y=event.y-10-popout_height)
+            elif x_is_hidden:
+                self.callout.place_configure(x=event.x-10-popout_width, y=event.y+10)
+            elif y_is_hidden:
+                self.callout.place_configure(x=event.x+10, y=event.y-10-popout_height)
+            else:
+                self.callout.place_configure(x=event.x+10, y=event.y+10)
+
+
+#testing code
 if __name__ == '__main__':
     view = MainView()
     view.buttons['skip'].configure(command=lambda:view.entries['lot'][0].configure(style='Invalid.TEntry'))
     view.buttons['enter'].configure(command=lambda:view.entries['lot'][0].configure(style='TEntry'))
+
+    from pathlib import Path
+    view.preview.set_image(Path('../_test_assets/sample_batch.png'))
+    view.preview.update()
+    view.preview.show()
+
+    callout = CalloutWindow(view)
+    view.preview.display.bind('<Enter>', callout.show)
+    view.preview.display.bind('<Leave>', callout.hide)
+    view.preview.display.bind('<Motion>', callout.update_position)
+
     view.mainloop()
