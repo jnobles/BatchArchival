@@ -1,4 +1,4 @@
-from view import MainView
+from view import MainView, ZoomWindow
 from model import Model
 from model import ArchivalModelError, NoFilesFoundError, WithinRetentionPeriodError
 import tkinter.messagebox as tkpopup
@@ -102,14 +102,25 @@ class Controller():
         self.view.attributes('-topmost', False)
 
     def run(self):
+        # binding view buttons to controller functions
         self.view.buttons['enter'].configure(command=self.enter_handler)
         self.view.buttons['skip'].configure(command=self.skip_handler)
         for entry in ['catalog', 'lot', 'year']:
             self.view.entries[entry][0].bind('<Return>', self.enter_handler)
         for entry in ['catalog', 'lot']:
             self.view.entries[entry][1].trace('w', lambda *_, var=self.view.entries[entry][1]: Controller.enforce_capital(var))
+        
+        # binding zoom to preview display        
+        zoom = ZoomWindow(self.view.preview)
+        self.view.preview.display.bind('<Enter>', zoom.show, add='+')
+        self.view.preview.display.bind('<Leave>', zoom.hide, add='+')
+        self.view.preview.display.bind('<Motion>', zoom.update_position)
+
+        # raise windows together whenever any is focused
         self.view.bind('<FocusIn>', self.raise_all_windows)
         self.view.preview.bind('<FocusIn>', self.raise_all_windows)
+
+        # start gui
         self.raise_all_windows()
         self.view.mainloop()
 
