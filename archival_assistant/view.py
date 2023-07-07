@@ -80,6 +80,7 @@ class PreviewPane(tk.Toplevel):
         super().__init__()
         self.parent = parent
         self.image = None # holds photoimage to prevent garbage collection
+        self.photoimage = None
 
         self.display = tk.Canvas(self)
         self.display.grid(row=0, column=0, sticky=tk.NSEW)
@@ -105,12 +106,13 @@ class PreviewPane(tk.Toplevel):
         self.deiconify()
 
     def set_image(self, path):
-        self.image = ImageTk.PhotoImage(Image.open(path))
+        self.image = Image.open(path)
+        self.photoimage = ImageTk.PhotoImage(self.image)
         self.update()
-        self.geometry(f'{self.image.width()}x{self.winfo_height()}')
+        self.geometry(f'{self.photoimage.width()}x{self.winfo_height()}')
         self.display.yview_moveto('0.0')
         self.display.delete(tk.ALL)
-        self.display.create_image(0, 0, anchor=tk.NW, image=self.image)
+        self.display.create_image(0, 0, anchor=tk.NW, image=self.photoimage)
         self.display.configure(scrollregion=self.display.bbox(tk.ALL))
 
     def on_mouse_scroll(self, evt):
@@ -123,64 +125,48 @@ class PreviewPane(tk.Toplevel):
         self.unbind('<MouseWheel>')
 
 
-class CalloutWindow():
+class ZoomWindow():
     def __init__(self, root):
         self.root = root
-        self.image = None
-        self.callout = None
-        
+        self.display = None
 
     def show(self, event):
-        if self.callout is None:
-            self.image = ImageTk.PhotoImage(Image.open(Path('../_test_assets/sample_batch.png').resolve()))
-            self.callout = ttk.Label(self.root.preview, image=self.image, relief='solid')
-            self.callout.place(x=0, y=0, width=150, height=150)
+        if self.display is None:
+            self.image = self.root.image
+            self.display = ttk.Label(self.root, image=self.root.photoimage, relief='solid')
+            self.display.place(x=0, y=0, width=150, height=150)
 
     def hide(self, event):
-        if self.callout is not None:
-            self.callout.destroy()
-            self.callout = None
+        if self.display is not None:
+            self.display.destroy()
+            self.display = None
             self.image = None
 
     def update_position(self, event):
-        if self.callout is not None:
-            #from pathlib import Path
-            image = Image.open(Path('../_test_assets/sample_batch.png').resolve())
+        # Creates a zoomed image of the region around the cursor then displays
+        if self.display is not None:
+            image = self.root.image
             zoom_minx = event.x - 36
             zoom_miny = event.y - 36
             zoom_maxx = event.x + 36
             zoom_maxy = event.y + 36
             image = image.crop((zoom_minx, zoom_miny, zoom_maxx, zoom_maxy))
             image = image.resize((150, 150))
-            self.image = ImageTk.PhotoImage(image)
-            self.callout.configure(image=self.image)
-            self.callout.image = self.image
-            #self.image = ImageTk.PhotoImage(image)
-            #self.root.update_idletasks()
+            image = ImageTk.PhotoImage(image)
+            self.display.configure(image=image)
+            self.display.image = image
 
-        if self.callout is not None:
-            window_width = self.root.preview.winfo_width()
-            window_height = self.root.preview.winfo_height()
-            popout_width = self.callout.winfo_width()
-            popout_height = self.callout.winfo_height()
-
-            popout_minx = event.x + 10
-            popout_miny = event.y + 10
-            popout_maxx = popout_width + popout_minx
-            popout_maxy = popout_height + popout_miny
-            
-
-            x_is_hidden = popout_maxx > window_width
-            y_is_hidden = popout_maxy > window_height
-
-            if x_is_hidden and y_is_hidden:
-                self.callout.place_configure(x=event.x-10-popout_width, y=event.y-10-popout_height)
-            elif x_is_hidden:
-                self.callout.place_configure(x=event.x-10-popout_width, y=event.y+10)
-            elif y_is_hidden:
-                self.callout.place_configure(x=event.x+10, y=event.y-10-popout_height)
+        # Moves the display if the cursor is getting too close 
+        if self.display is not None:
+            left, top, right, bottom = (0, 0, 150, 150) # zoom bounds
+            if event.x < right + 35 and event.y < bottom + 35:
+                right = self.root.winfo_width()
+                left = right - 150
+                self.display.place_configure(x=left, y=top)
             else:
-                self.callout.place_configure(x=event.x+10, y=event.y+10)
+                self.display.place_configure(x=left, y=top)
+        
+        self.display.update_idletasks()
 
 
 #testing code
@@ -194,7 +180,7 @@ if __name__ == '__main__':
     view.preview.update()
     view.preview.show()
 
-    callout = CalloutWindow(view)
+    callout = ZoomWindow(view.preview)
     view.preview.display.bind('<Enter>', callout.show)
     view.preview.display.bind('<Leave>', callout.hide)
     view.preview.display.bind('<Motion>', callout.update_position)
