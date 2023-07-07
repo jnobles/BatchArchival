@@ -88,7 +88,7 @@ class PreviewPane(tk.Toplevel):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         v_scrollbar.grid(row=0, column=1, sticky=tk.NS)
-        self.display.configure(yscrollcommand=v_scrollbar.set,)
+        self.display.configure(yscrollcommand=v_scrollbar.set)
         v_scrollbar.configure(command=self.display.yview)
 
         self.title('Preview')
@@ -146,10 +146,11 @@ class ZoomWindow():
         # Creates a zoomed image of the region around the cursor then displays
         if self.display is not None:
             image = self.root.image
+            scroll_offset = self.root.display.yview()[0] * image.height
             zoom_minx = event.x - 36
-            zoom_miny = event.y - 36
+            zoom_miny = event.y - 36 + scroll_offset
             zoom_maxx = event.x + 36
-            zoom_maxy = event.y + 36
+            zoom_maxy = event.y + 36 + scroll_offset
             image = image.crop((zoom_minx, zoom_miny, zoom_maxx, zoom_maxy))
             image = image.resize((150, 150))
             image = ImageTk.PhotoImage(image)
