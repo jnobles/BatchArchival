@@ -5,20 +5,24 @@ import fitz
 import datetime
 import tempfile
 
+
 class ArchivalModelError(Exception):
     pass
+
 
 class NoFilesFoundError(ArchivalModelError):
     pass
 
+
 class WithinRetentionPeriodError(ArchivalModelError):
     pass        
 
-class Model():
+
+class Model:
     # Regex matching strings
     file_type_pattern = re.compile(r'.*\.pdf')
     catalogs_pattern = re.compile(r'(?:[0-9]|[XWQ])[0-9]{5}')
-    lot_pattern = re.compile(r'(?:[ISOTEC])[A-Z][0-9]{4}|MBB[ABCD][0-9]{4}V?')
+    lot_pattern = re.compile(r'[ISOTEC][A-Z][0-9]{4}|MBB[ABCD][0-9]{4}V?')
     retention_years = 7
 
     @staticmethod
@@ -51,7 +55,7 @@ class Model():
         return [Path(file) for file in file_list]
 
     def cache_previews(self):
-        # if the script is running as a pyinstaller bundled executible, prepares method to provide
+        # if the script is running as a pyinstaller bundled executable, prepares method to provide
         # progress updates on splash
         # transforms self.file_list from list(Path(pdf)) to list(Path(pdf), Path(png))
         try:
@@ -92,7 +96,7 @@ class Model():
             self.active_file = None
             raise NoFilesFoundError(f'No .pdf files found in {self.input_dir}')
 
-    def move_active_file(self, catalog:str, lot:str, year:int, invalid=False):
+    def move_active_file(self, catalog: str, lot: str, year: int, invalid=False):
         i = 1
         if invalid:
             (self.output_dir / '_RETURN TO FILING ROOM').mkdir(exist_ok=True)
@@ -109,7 +113,7 @@ class Model():
                 file_target = self.output_dir / catalog / f'{year} {lot} ({i}).pdf'
             self.active_file[0].rename(file_target)
 
-
+    @staticmethod
     def validate_entry(self, entry, name):
         if name == 'catalog':
             if not re.match(Model.catalogs_pattern, entry):

@@ -6,6 +6,7 @@ import fitz
 from pathlib import Path
 from filelock import FileLock, FileLockExistsException
 
+
 class Controller():
     def __init__(self, model, view):
         self.model = model
@@ -22,9 +23,9 @@ class Controller():
         try:
             self.model.validate_entry(self.view.entries['year'][1].get(), 'year')
         except WithinRetentionPeriodError:
-            tkpopup.showwarning(title='Still Within Retetion Period',
+            tkpopup.showwarning(title='Still Within Retention Period',
                                 message='All batch records must be kept for 7 years from ' +
-                                'completion.  Return this file to the ISO room. Do not archive.')
+                                        'completion.  Return this file to the ISO room. Do not archive.')
             catalog = self.view.entries['catalog'][1].get()
             lot = self.view.entries['lot'][1].get()
             year = self.view.entries['year'][1].get()
@@ -50,9 +51,11 @@ class Controller():
             else:
                 self.view.entries['year'][0].configure(style='Invalid.TEntry')
 
-
-        if all([self.model.validate_entry(self.view.entries['catalog'][1].get(), 'catalog'), self.model.validate_entry(self.view.entries['lot'][1].get(), 'lot'), self.model.validate_entry(self.view.entries['year'][1].get(), 'year')]):
-            self.model.move_active_file(self.view.entries['catalog'][1].get(), self.view.entries['lot'][1].get(), self.view.entries['year'][1].get())
+        if all([self.model.validate_entry(self.view.entries['catalog'][1].get(), 'catalog'),
+                self.model.validate_entry(self.view.entries['lot'][1].get(), 'lot'),
+                self.model.validate_entry(self.view.entries['year'][1].get(), 'year')]):
+            self.model.move_active_file(self.view.entries['catalog'][1].get(), self.view.entries['lot'][1].get(),
+                                        self.view.entries['year'][1].get())
             try:
                 self.model.get_next_file()
             except NoFilesFoundError:
@@ -66,7 +69,7 @@ class Controller():
     def skip_handler(self):
         self.clear_all_entries()
         for entry in ['catalog', 'lot', 'year']:
-           self.view.entries[entry][0].configure(style='TEntry')
+            self.view.entries[entry][0].configure(style='TEntry')
         self.model.get_next_file(return_active=True)
         self.view.preview.set_image(self.model.active_file[1])
         self.view.preview.update_idletasks()
@@ -88,7 +91,7 @@ class Controller():
 
     def update_status_files_remaining(self):
         if len(self.model.file_list) >= 1:
-            self.view.status.set(f'{len(self.model.file_list)+1} files remaining.')
+            self.view.status.set(f'{len(self.model.file_list) + 1} files remaining.')
         else:
             if self.model.active_file is not None:
                 self.view.status.set('1 file remaining.')
@@ -108,8 +111,9 @@ class Controller():
         for entry in ['catalog', 'lot', 'year']:
             self.view.entries[entry][0].bind('<Return>', self.enter_handler)
         for entry in ['catalog', 'lot']:
-            self.view.entries[entry][1].trace('w', lambda *_, var=self.view.entries[entry][1]: Controller.enforce_capital(var))
-        
+            self.view.entries[entry][1].trace('w', lambda *_,
+                                              var=self.view.entries[entry][1]: Controller.enforce_capital(var))
+
         # binding zoom to preview display        
         zoom = ZoomWindow(self.view.preview)
         self.view.preview.display.bind('<Enter>', zoom.show, add='+')
@@ -124,11 +128,13 @@ class Controller():
         self.raise_all_windows()
         self.view.mainloop()
 
+
 def prepare_model():
-    # prodvides splash screen information for model initilization
-    # when run as a pyinstaller bundled executible, otherwise simply
+    # provides splash screen information for model initialization
+    # when run as a pyinstaller bundled executable, otherwise simply
     # initializes and returns a model object
-    input_dir = Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc/_ArchivalTools/ToBeProcessed')
+    input_dir = Path(
+        'S:/Production Groups/Historical Data Batch Records, Rev History, etc/_ArchivalTools/ToBeProcessed')
     output_dir = Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc')
 
     try:
@@ -152,7 +158,9 @@ def prepare_model():
 
     return model
 
-@FileLock.lock(Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc/_ArchivalTools/ToBeProcessed/running.lock'))
+
+@FileLock.lock(Path(
+    'S:/Production Groups/Historical Data Batch Records, Rev History, etc/_ArchivalTools/ToBeProcessed/running.lock'))
 def run_app():
     model = prepare_model()
     if model is not None:
@@ -160,26 +168,33 @@ def run_app():
         app = Controller(model, view)
         app.run()
 
+
 if __name__ == '__main__':
     try:
         run_app()
     except Exception as e:
         try:
             import pyi_splash
+
             pyi_splash.close()
         except (ModuleNotFoundError, NameError):
             pass
         if type(e) == PermissionError:
-            tkpopup.showerror(title='Insufficient Permissions', message='You do not have sufficient privilages to the Archival Folders.  Exiting.')
+            tkpopup.showerror(title='Insufficient Permissions',
+                              message='You do not have sufficient privilages to the Archival Folders.  Exiting.')
         elif type(e) == FileLockExistsException:
             tkpopup.showerror(title='Process Locked',
-                              message='Batch Archival Assistant is already running on another computer. Running multiple instances of this program could result in errors.' +
-                                    f'\n\nThe current locking instance was started by {e.created_by} at {e.created_on}.')
-        else: # display error trace in new tkinter window when encountering unhandled fatal error
-            import traceback, tkinter as tk
+                              message='Batch Archival Assistant is already running on another computer. Running '
+                                      'multiple instances of this program could result in errors.' +
+                                      'The current locking instance was started by ' +
+                                      f'{e.created_by} at {e.created_on}.')
+        else:  # display error trace in new tkinter window when encountering unhandled fatal error
+            import traceback
+            import tkinter as tk
+
             window = tk.Tk()
             window.title('Unhandled Error')
-            tk.Label(window, text='The following error occured and was not handled:').pack(side=tk.TOP, fill=tk.BOTH)
+            tk.Label(window, text='The following error occurred and was not handled:').pack(side=tk.TOP, fill=tk.BOTH)
             error_text = tk.Text(window, wrap='none')
             error_text.insert('1.0', ''.join(traceback.format_exc()))
             error_text.config(state='disabled')
@@ -187,4 +202,3 @@ if __name__ == '__main__':
             window.geometry('900x400')
             window.eval('tk::PlaceWindow . center')
             window.mainloop()
-
