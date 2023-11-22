@@ -47,9 +47,9 @@ class MainView(tk.Tk):
 
     def create_entry(self, parent, name, row, col, rowspan=1, colspan=1):
         stringVar = tk.StringVar()
-        entry = ttk.Entry(parent, textvariable=stringVar, font=self.style.lookup("TEntry", "font"))
+        entry = ttk.Entry(parent, textvariable=stringVar, font=self.style.lookup('TEntry', 'font'))
         # for some reason, ttk.Entry font cannot be directly styled via ttk.Style(),
-        # the font=self.style.lookup("TEntry", "font") workaround is courtesy of j123b567 on StackOverflow
+        # the font=self.style.lookup('TEntry', 'font') workaround is courtesy of j123b567 on StackOverflow
         self.entries[name] = (entry, stringVar)
         entry.grid(row=row, column=col, rowspan=rowspan, columnspan=colspan)
 
