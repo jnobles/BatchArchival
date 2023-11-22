@@ -1,9 +1,9 @@
 __pycache__/
 
-*/build/
-*/dist/
+build/build
+build/dist
 
 *sublime-workspace
 *sublime-project
 
-.idea
+.idea/

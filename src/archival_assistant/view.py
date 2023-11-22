@@ -1,17 +1,18 @@
 import tkinter as tk
 from tkinter import ttk
-
+from PIL import ImageTk, Image
 
 
 class MainView(tk.Tk):
     @classmethod
-    def press_focused_button(self, event):
+    def press_focused_button(cls, event):
         event.widget.state(['pressed'])
         event.widget.invoke()
         event.widget.after(100, lambda: event.widget.state(['!pressed']))
 
     def __init__(self):
         super().__init__()
+        self.style = None
         self.set_stylings()
         self.buttons = {}
         self.entries = {}
@@ -33,7 +34,7 @@ class MainView(tk.Tk):
         self.style.configure('Invalid.TEntry', fieldbackground='red')
 
         # Add <Enter> as a button for activating focused button
-        self.bind_class('TButton', '<Return>', MainView.press_focused_button)    
+        self.bind_class('TButton', '<Return>', MainView.press_focused_button)
 
     def create_label(self, parent, text, row, col, rowspan=1, colspan=1, anchor=tk.CENTER):
         label = ttk.Label(parent, text=text, anchor=anchor)
@@ -46,9 +47,9 @@ class MainView(tk.Tk):
 
     def create_entry(self, parent, name, row, col, rowspan=1, colspan=1):
         stringVar = tk.StringVar()
-        entry = ttk.Entry(parent, textvariable=stringVar, font=self.style.lookup("TEntry", "font"))
-        # for some reason, ttk.Entry font cannot be directly styled via ttk.Style(), the font=self.style.lookup("TEntry", "font")
-        # workaround is curtosy of j123b567 on StackOverflow
+        entry = ttk.Entry(parent, textvariable=stringVar, font=self.style.lookup('TEntry', 'font'))
+        # for some reason, ttk.Entry font cannot be directly styled via ttk.Style(),
+        # the font=self.style.lookup('TEntry', 'font') workaround is courtesy of j123b567 on StackOverflow
         self.entries[name] = (entry, stringVar)
         entry.grid(row=row, column=col, rowspan=rowspan, columnspan=colspan)
 
@@ -73,13 +74,12 @@ class MainView(tk.Tk):
         self.title('Batch Archival Assistant')
         self.eval('tk::PlaceWindow . center')
 
-        
-from PIL import ImageTk, Image
+
 class PreviewPane(tk.Toplevel):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
-        self.image = None # holds photoimage to prevent garbage collection
+        self.image = None  # holds image to prevent garbage collection
         self.photoimage = None
 
         self.display = tk.Canvas(self)
@@ -116,7 +116,7 @@ class PreviewPane(tk.Toplevel):
         self.display.configure(scrollregion=self.display.bbox(tk.ALL))
 
     def on_mouse_scroll(self, evt):
-        self.display.yview_scroll(int(-1*(evt.delta/120)), 'units')
+        self.display.yview_scroll(int(-1 * (evt.delta / 120)), 'units')
 
     def on_enter(self, evt):
         self.bind('<MouseWheel>', self.on_mouse_scroll)
@@ -125,8 +125,9 @@ class PreviewPane(tk.Toplevel):
         self.unbind('<MouseWheel>')
 
 
-class ZoomWindow():
+class ZoomWindow:
     def __init__(self, root):
+        self.image = None
         self.root = root
         self.display = None
 
@@ -159,24 +160,25 @@ class ZoomWindow():
 
         # Moves the display if the cursor is getting too close 
         if self.display is not None:
-            left, top, right, bottom = (0, 0, 150, 150) # zoom bounds
+            left, top, right, bottom = (0, 0, 150, 150)  # zoom bounds
             if event.x < right + 35 and event.y < bottom + 35:
                 right = self.root.winfo_width()
                 left = right - 150
                 self.display.place_configure(x=left, y=top)
             else:
                 self.display.place_configure(x=left, y=top)
-        
+
         self.display.update_idletasks()
 
 
-#testing code
+# testing code
 if __name__ == '__main__':
     view = MainView()
-    view.buttons['skip'].configure(command=lambda:view.entries['lot'][0].configure(style='Invalid.TEntry'))
-    view.buttons['enter'].configure(command=lambda:view.entries['lot'][0].configure(style='TEntry'))
+    view.buttons['skip'].configure(command=lambda: view.entries['lot'][0].configure(style='Invalid.TEntry'))
+    view.buttons['enter'].configure(command=lambda: view.entries['lot'][0].configure(style='TEntry'))
 
     from pathlib import Path
+
     view.preview.set_image(Path('../_test_assets/sample_batch.png'))
     view.preview.update()
     view.preview.show()

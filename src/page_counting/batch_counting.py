@@ -5,14 +5,13 @@ import colorama
 from colorama import Fore, Back, Style
 
 colorama.init(autoreset=True)
-print('\033[?25l\033[2J',end='')
+print('\033[?25l\033[2J', end='')
 
-
-
-paper_bond_weight = 20 #lbs
+paper_bond_weight = 20  # lbs
 sheets_per_bond = 500
 letter_page_per_bond = 4
 weigh_of_letter_page = paper_bond_weight / sheets_per_bond / letter_page_per_bond
+
 
 def print_count(current_file_index, total_file_count, pages_tallied):
     print('\033[1;1H', end='')
@@ -25,10 +24,9 @@ def print_count(current_file_index, total_file_count, pages_tallied):
     print(Fore.CYAN + f'{pages_tallied:3}' + Fore.WHITE)
 
 
-
 if __name__ == '__main__':
     target = Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc')
-    exclude = set(['_RETURN TO FILING ROOM'])
+    exclude = {'_RETURN TO FILING ROOM'}
     tree = os.walk(target)
     file_list = []
     files_found = 0

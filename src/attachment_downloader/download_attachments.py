@@ -6,6 +6,7 @@ import time
 
 colorama.init(autoreset=True)
 
+
 def save_files():
     outlook_connection = win32com.client.Dispatch('Outlook.Application').GetNamespace('MAPI')
     inbox = outlook_connection.GetDefaultFolder(6)
@@ -24,15 +25,17 @@ def save_files():
         print(Fore.CYAN + f'{current_message_index:3}', end='')
         print(' of ', end='')
         print(Fore.CYAN + f'{total_message_count:3}.')
-        
+
         if message.Unread and message.subject == '':
-            if message.ReceivedByName == message.SenderName and len(message.Attachments) == 1 and str(message.Attachments.Item(1)) == 'Scan.pdf':
-                attatchment = message.Attachments.Item(1)
+            if (message.ReceivedByName == message.SenderName
+                    and len(message.Attachments) == 1
+                    and str(message.Attachments.Item(1)) == 'Scan.pdf'):
+                attachment = message.Attachments.Item(1)
                 i = 1
                 while (save_to / f'Scan ({i}).pdf').exists():
                     i += 1
                 target_filename = str(save_to / f'Scan ({i}).pdf')
-                attatchment.SaveASFile(target_filename)
+                attachment.SaveASFile(target_filename)
                 print(f'\033[{save_line};1HSaved {target_filename}', end='')
                 if save_line >= 3 + 10:
                     save_line = 3
@@ -41,10 +44,11 @@ def save_files():
                 message.Unread = False
         current_message_index += 1
 
-    
+
 def check_write_permissions(target):
-        (target / 'test').touch()
-        (target / 'test').unlink()
+    (target / 'test').touch()
+    (target / 'test').unlink()
+
 
 def exit(timeout=5):
     while timeout >= 0:
@@ -57,12 +61,13 @@ def exit(timeout=5):
 
 
 if __name__ == '__main__':
-    output_dir = Path('S:/Production Groups/Historical Data Batch Records, Rev History, etc/_ArchivalTools/ToBeProcessed')
+    output_dir = Path('S:/Production Groups/Historical Data Batch Records, Rev History, '
+                      'etc/_ArchivalTools/ToBeProcessed')
 
     try:
         check_write_permissions(output_dir)
     except PermissionError:
-        print('Insufficient privilages.')
+        print('Insufficient privileges.')
     else:
         save_files()
     finally:

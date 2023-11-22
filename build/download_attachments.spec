@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['download_attachments.py'],
+    ['../src/attachment_downloader/download_attachments.py'],
     pathex=[],
     binaries=[],
     datas=[],

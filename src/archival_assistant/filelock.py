@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime
 import functools
 
+
 class FileLockExistsException(Exception):
     def __init__(self, message, file_lock_object):
         super().__init__(message)
@@ -11,8 +12,8 @@ class FileLockExistsException(Exception):
         self.created_on = file_lock_object.created_on
 
 
-class FileLock():
-    def __init__(self, lock_path:Path):
+class FileLock:
+    def __init__(self, lock_path: Path):
         self.lock_path = lock_path
         self.created_by = None
         self.created_on = None
