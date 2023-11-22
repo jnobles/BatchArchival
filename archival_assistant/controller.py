@@ -1,8 +1,7 @@
 from view import MainView, ZoomWindow
 from model import Model
-from model import ArchivalModelError, NoFilesFoundError, WithinRetentionPeriodError
+from model import NoFilesFoundError, WithinRetentionPeriodError
 import tkinter.messagebox as tkpopup
-import fitz
 from pathlib import Path
 from filelock import FileLock, FileLockExistsException
 
