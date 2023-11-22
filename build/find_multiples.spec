@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['batch_counting.py'],
+    ['../src/find_multiples/find_multiples.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -19,12 +19,6 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False,
 )
-
-a.binaries = a.binaries - TOC([
-    ('pywintypes310.dll', None, None),
-    ('pythoncom310.dll', None, None)
-])
-
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
@@ -32,9 +26,9 @@ exe = EXE(
     a.scripts,
     a.binaries,
     a.zipfiles,
-    a.datas, 
+    a.datas,
     [],
-    name='PageCounting',
+    name='Multi-file Finder',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
