@@ -6,7 +6,7 @@ from pathlib import Path
 from filelock import FileLock, FileLockExistsException
 
 
-class Controller():
+class Controller:
     def __init__(self, model, view):
         self.model = model
         self.view = view
@@ -180,7 +180,7 @@ if __name__ == '__main__':
             pass
         if type(e) == PermissionError:
             tkpopup.showerror(title='Insufficient Permissions',
-                              message='You do not have sufficient privilages to the Archival Folders.  Exiting.')
+                              message='You do not have sufficient privileges to the Archival Folders.  Exiting.')
         elif type(e) == FileLockExistsException:
             tkpopup.showerror(title='Process Locked',
                               message='Batch Archival Assistant is already running on another computer. Running '
