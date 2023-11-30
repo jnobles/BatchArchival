@@ -12,5 +12,6 @@ class TestFindMultiples(unittest.TestCase):
         exclude = {'exclude_me'}
         pdf_list = get_list_pdfs(target, exclude)
         self.assertEqual(len(pdf_list), 6)
-        self.assertIn(Path('../test_assets/0000 ABCD0000 (2).pdf'), pdf_list)
+        self.assertIn(Path('../test_assets/123456/0000 ABCD0000 (2).pdf'), pdf_list)
+        self.assertIn(Path('../test_assets/234567/0000 ABCD0002.pdf'), pdf_list)
         self.assertNotIn(Path('../test_assets/exclude_me/1111 ABCD0000.pdf'), pdf_list)
