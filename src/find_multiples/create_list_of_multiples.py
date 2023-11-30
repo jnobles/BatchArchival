@@ -15,11 +15,11 @@ def get_list_pdfs(target: Path, exclude: set) -> list:
     return file_list
 
 
-def get_dict_of_duplicates(file_list: list, output_file: Path) -> dict:
+def get_dict_of_duplicates(file_list: list) -> dict:
     duplicates = {}
     for file in file_list:
         if re.search(r'\(\d+\)', str(file)):
-            matches = re.match(r'.*\\(.{6})\\\d{4}\s(.*)\s\(\d+\)', str(file)).group(1)
+            matches = re.match(r'.*\\(.{6})\\\d{4}\s(.*)\s\(\d+\)', str(file))
             catalog = matches.group(1)
             batch = matches.group(2)
             if catalog not in duplicates:
